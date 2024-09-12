@@ -29,11 +29,7 @@ For this project, we will use the Groq API, which is currently free. You will ne
    chainlit run chatbot.py -w
    ```
 
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
 
-
-
-<!-- USAGE EXAMPLES -->
 ## Usage
 
 To interact with your chatbot, open your browser and go to:
@@ -46,5 +42,3 @@ For more information and documentation, refer to the following links:
 
 1. [Groq Documentation](https://console.groq.com/docs/quickstart)
 2. [Chainlit Documentation](https://docs.chainlit.io/get-started/pure-python)
-
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
