@@ -42,3 +42,7 @@ For more information and documentation, refer to the following links:
 
 1. [Groq Documentation](https://console.groq.com/docs/quickstart)
 2. [Chainlit Documentation](https://docs.chainlit.io/get-started/pure-python)
+
+## How to Prompt using CO-STAR Frame Work ?
+   Open the following link:
+   https://docs.google.com/document/d/1UnxhUA_7Ogae1w6VMce0inWGprAGlML5hePAFew3FkY/edit?usp=sharing
