@@ -20,7 +20,7 @@ This project is a hybrid search engine combining **semantic search** using vecto
 
 ### Qdrant Setup
 You need to have a Qdrant instance running locally or server. You can use Docker to set up Qdrant:
-OR In the the file keyword_search.py change to
+OR In the file semantic_search.py change to
   ```sh
  client = QdrantClient(":memory:")
  ```
