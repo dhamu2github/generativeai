@@ -11,9 +11,13 @@ model = SentenceTransformer("all-MiniLM-L6-v2") # You can use a different model 
 
 # Reciprocal Rank Fusion
 def reciprocal_rank_fusion(semantic_ranks, keyword_ranks, max_rank=60):
+    
     rrf_scores = {}
+    # Further unpack from the main list to get correct doc-Id
+    doc_ids = [hit.id for hit in semantic_ranks]
+
     for i, doc_id in enumerate(semantic_ranks):
-        doc_id = rrf_scores.get(doc_id, 0) + 1 / (max_rank + i)
+        rrf_scores[doc_ids[i]] = rrf_scores.get(doc_ids[i], 0) + 1 / (max_rank + i)
     for i, doc_id in enumerate(keyword_ranks):
         rrf_scores[doc_id] = rrf_scores.get(doc_id, 0) + 1 / (max_rank + i)
     
@@ -33,9 +37,11 @@ if __name__ == "__main__":
    #Load Semantic search using with DB
     create_qdrant_collection()
     upload_vectors_to_qdrant_collection(documents)
-    semantic_results, semantic_scores = semantic_search_qdrant(query) 
+    
+    #call sematic search function
+    semantic_results = semantic_search_qdrant(query) # with DB
 
-    #Keyword Seach call 
+    #call keyword search function
     keyword_results, keyword_scores = keyword_search(query, documents)
 
     # Combine results using RRF

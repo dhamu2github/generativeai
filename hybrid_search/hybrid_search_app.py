@@ -26,15 +26,22 @@ if query:
     #Load Semantic search and its functions using with DB
     create_qdrant_collection()
     upload_vectors_to_qdrant_collection(documents)
-    semantic_results, semantic_scores = semantic_search_qdrant(query) 
+        #call sematic search function
+    semantic_results = semantic_search_qdrant(query) # with DB
+
+
+    # Further unpack from the main list
+    doc_ids = [hit.id for hit in semantic_results]
+    doc_texts = [hit.payload["document_text"] for hit in semantic_results]
+    scores = [hit.score for hit in semantic_results]
 
     #Load Keyword search
     keyword_results, keyword_scores = keyword_search(query, documents)
 
     # Display individual results
     st.write("**Semantic Search Results**")
-    for i, result_doc in enumerate(semantic_results):
-        st.write(f"Document {i + 1}: {result_doc} (Score: {semantic_scores[i]:.4f})")
+    for i, doc in enumerate(semantic_results):
+        st.write(f"Document {doc_ids[i] + 1}: {doc_texts[i]} (Score: {scores[i]:.4f})")
 
     st.write("**Keyword Search Results**")
     for i, doc_id in enumerate(keyword_results):
