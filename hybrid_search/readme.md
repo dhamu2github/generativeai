@@ -4,6 +4,8 @@ This project is a hybrid search engine combining **semantic search** using vecto
 
 ## Project Structure
 
+![Alt text](./images/hybrid_search_structure.jpeg)
+
 1. **hybrid_search_app.py**: The main script for running the Streamlit application, where the user can enter a search query to retrieve documents using both semantic and keyword search.
 2. **semantic_search.py**: Implements the semantic search functionality using the Qdrant database for storing and retrieving vector embeddings generated from the documents.
 3. **keyword_search.py**: Implements keyword-based search using BM25 to rank documents based on the query term.
