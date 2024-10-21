@@ -37,7 +37,7 @@ This is a web application built using Streamlit that enables users to ask questi
    ```bash
    pip install -r requirements.txt
    ```
-# Usage
+## Usage
 1. Run the Streamlit app:
  ```bash
  streamlit run image_question_answer_app.py
@@ -46,7 +46,7 @@ This is a web application built using Streamlit that enables users to ask questi
 
 3. Click "Submit" to receive an answer from the model.
 
-# Code Overview
+## Code Overview
 image_question_answer_app.py
 This is the main application file. It provides the interface using Streamlit for:
 
@@ -60,17 +60,17 @@ This file contains the logic to:
 - Load the pre-trained LLaVA model (LlavaForConditionalGeneration) and its processor.
 - Generate a response from the model based on the uploaded image and question.
 
-# Example:
+## Example:
 1. Upload an image of a busy city street.
 2. Ask: "What is happening in the image?"
 3. The app will display a response such as:
 The image depicts a busy city street with people walking along the sidewalk and vehicles passing by.
 
-# Notes:
+## Notes:
 - The LLaVA model is pre-trained and may have limitations in understanding certain images or questions.
 - Ensure the uploaded image is clear and relevant to the question for better results.
 
-# Acknowledgments
+## Acknowledgments
 - Hugging Face Transformers for providing the LLaVA model.
 - Streamlit for the interactive app framework.
 1. [Hugging Face Transformers](https://huggingface.co/llava-hf/llava-1.5-7b-hf)
