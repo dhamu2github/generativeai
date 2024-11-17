@@ -94,7 +94,7 @@ This application visualizes the internal workings of transformer-based models li
    ![Gradient Analysis Example](./images/gradient_analysis.png)
 
 2. **Attention Heatmap**
-   ![Attention Heatmap Example](./images/activation_distrib.png)
+   ![Attention Heatmap Example](./images/activation_distribution.png)
 
 3. **Attention Heads Analysis**
    ![Attention Heads Example](./images/attention_heads.png)
