@@ -121,8 +121,8 @@ model_name = st.selectbox(
   ```
 
 ## Acknowledgments
-- I would to like thank Mr. Asif Qamar [Support Vecors Lab](https://supportvectors.io/) who guide me to think in AI
-- My thought process explored with [claude.ai](https://claude.ai/)
+- I would like to thank Mr. Asif Qamar of [Support Vecors Lab](https://supportvectors.io/) for guiding me to think critically about AI.
+- My thought process was enhanced by [claude.ai](https://claude.ai/)
 - Built with [Streamlit](https://streamlit.io/)
 - Uses [Hugging Face Transformers](https://huggingface.co/transformers/)
 - Visualization powered by [Matplotlib](https://matplotlib.org/) and [Seaborn](https://seaborn.pydata.org/)
