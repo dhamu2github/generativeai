@@ -91,13 +91,19 @@ This application visualizes the internal workings of transformer-based models li
 
 ## Visualization Examples
 1. **Gradient Analysis**
-   ![Gradient Analysis Example](assets/gradient_analysis.png)
+   ![Gradient Analysis Example](./images/gradient_analysis.png)
 
 2. **Attention Heatmap**
-   ![Attention Heatmap Example](assets/attention_heatmap.png)
+   ![Attention Heatmap Example](./images/activation_distrib.png)
 
-3. **Hidden States Analysis**
-   ![Hidden States Example](assets/hidden_states.png)
+3. **Attention Heads Analysis**
+   ![Attention Heads Example](./images/attention_heads.png)
+
+4. **Mean Hidden State Analysis**
+   ![Mean Hidden State Example](./images/mean_hidden_state.png)
+
+5. **Activation Distribution**
+   ![Activation Distribution Example](./images/activation_distribution.png)
 
 ## Models Supported
 - `bert-base-uncased`
