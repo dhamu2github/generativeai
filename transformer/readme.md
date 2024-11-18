@@ -90,6 +90,8 @@ This application visualizes the internal workings of transformer-based models li
 - Helps understand the model's internal representations
 
 ## Visualization Examples
+By default, the app loads with the input text: "A cow jumped over the moon." The visualizations below are generated using the model "bert-base-uncased".
+
 1. **Gradient Analysis**
    ![Gradient Analysis Example](./images/gradient_analysis.png)
 
