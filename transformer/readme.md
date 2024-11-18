@@ -123,7 +123,7 @@ model_name = st.selectbox(
   ```
 
 ## Acknowledgments
-- I would like to thank Mr. Asif Qamar of [Support Vecors Lab](https://supportvectors.io/) for guiding me to think critically about AI.
+- I would like to extend my sincere appreciation to Mr. Asif Qamar of [Support Vecors Lab](https://supportvectors.io/) for his guidance in cultivating critical thinking skills in AI.
 - My thought process was enhanced by [claude.ai](https://claude.ai/)
 - Built with [Streamlit](https://streamlit.io/)
 - Uses [Hugging Face Transformers](https://huggingface.co/transformers/)
