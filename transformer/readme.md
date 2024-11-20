@@ -92,19 +92,19 @@ This application visualizes the internal workings of transformer-based models li
 ## Visualization Examples
 By default, the app loads with the input text: "A cow jumped over the moon." The visualizations below are generated using the model "bert-base-uncased".
 
-1. **Gradient Analysis** <a href="https://docs.google.com/document/d/1WRKv4-ptH4km6GeuzTcl4xNya374hFOyqfSg32jw1P4/edit?tab=t.0#heading=h.jpk29mb4p1ia" target="_blank">Click here for understanding the graph</a>
+1. **Gradient Analysis** [Click here to understand the graph](https://docs.google.com/document/d/1WRKv4-ptH4km6GeuzTcl4xNya374hFOyqfSg32jw1P4/edit?tab=t.0#heading=h.jpk29mb4p1ia)
    ![Gradient Analysis Example](./images/gradient_analysis.png)
 
-2. **Attention Heatmap**
+2. **Attention Heatmap** [Click here to understand the heatmap](https://docs.google.com/document/d/1F2BpcgN6SaX-4ubiXgnZBwJi6gySDsFfm8kSyKTuRzs/edit?tab=t.0#heading=h.3lsu0j1dvuzq)
    ![Attention Heatmap Example](./images/attention_heatmap.png)
 
-3. **Attention Heads Analysis**
+3. **Attention Heads Analysis** [Click here to understand the attention heads](https://docs.google.com/document/d/1TIPY61Qgy5HOHSQTVf6y1ot6HlkKEf6PISxHA1LXndQ/edit?tab=t.0#heading=h.fnfy7hkbjx96)
    ![Attention Heads Example](./images/attention_heads.png)
 
-4. **Mean Hidden State Analysis**
+4. **Mean Hidden State Analysis** [Click here to understand the hidden state](https://docs.google.com/document/d/1508lW6B0mRA8tMYeRRYz78yQr4T9vmplRi-YZqXMC7g/edit?tab=t.0#heading=h.amos3lakh255)
    ![Mean Hidden State Example](./images/mean_hidden_state.png)
 
-5. **Activation Distribution**
+5. **Activation Distribution** [Click here to understand the hidden state](https://docs.google.com/document/d/15equQqDm5FBNSagDnm2tMaP9JAQppvkgmEX1VZuLpSA/edit?tab=t.0#heading=h.i43zrfbupu72)
    ![Activation Distribution Example](./images/activation_distribution.png)
 
 ## Models Supported
