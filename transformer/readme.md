@@ -104,7 +104,7 @@ By default, the app loads with the input text: "A cow jumped over the moon." The
 4. **Mean Hidden State Analysis** [Click here to understand the hidden state](https://docs.google.com/document/d/1508lW6B0mRA8tMYeRRYz78yQr4T9vmplRi-YZqXMC7g/edit?tab=t.0#heading=h.amos3lakh255)
    ![Mean Hidden State Example](./images/mean_hidden_state.png)
 
-5. **Activation Distribution** [Click here to understand the hidden state](https://docs.google.com/document/d/15equQqDm5FBNSagDnm2tMaP9JAQppvkgmEX1VZuLpSA/edit?tab=t.0#heading=h.i43zrfbupu72)
+5. **Activation Distribution** [Click here to understand the activation distribution](https://docs.google.com/document/d/15equQqDm5FBNSagDnm2tMaP9JAQppvkgmEX1VZuLpSA/edit?tab=t.0#heading=h.i43zrfbupu72)
    ![Activation Distribution Example](./images/activation_distribution.png)
 
 ## Models Supported
