@@ -1,0 +1,938 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Harness Engineering — A Field Guide</title>
+<style>
+  :root{
+    --bg:#10151c;
+    --panel:#161d26;
+    --panel-2:#1c2530;
+    --line:#2a3441;
+    --line-soft:#20293380;
+    --text:#e7eaee;
+    --text-dim:#98a3b0;
+    --text-faint:#5f6b78;
+    --copper:#d98a47;
+    --copper-dim:#8a5b32;
+    --teal:#5fbfc0;
+    --amber:#e0b15a;
+    --fault:#c9614f;
+    --serif: "IBM Plex Serif", Georgia, serif;
+    --sans: "IBM Plex Sans", -apple-system, "Segoe UI", sans-serif;
+    --mono: "IBM Plex Mono", "SF Mono", Consolas, monospace;
+  }
+
+  @font-face{font-family:"IBM Plex Serif";src:local("IBM Plex Serif");}
+  * { box-sizing:border-box; }
+  html{scroll-behavior:smooth;}
+  body{
+    margin:0;
+    background:var(--bg);
+    color:var(--text);
+    font-family:var(--sans);
+    font-size:16px;
+    line-height:1.65;
+  }
+  a{ color:var(--teal); text-decoration:none; border-bottom:1px solid var(--line); }
+  a:hover{ border-color:var(--teal); }
+
+  ::selection{ background:var(--copper-dim); color:#fff; }
+
+  /* ---------- layout shell ---------- */
+  .shell{
+    display:grid;
+    grid-template-columns:260px 1fr;
+    min-height:100vh;
+  }
+  @media (max-width:920px){
+    .shell{ grid-template-columns:1fr; }
+    nav.toc{ position:relative; height:auto; border-right:none; border-bottom:1px solid var(--line); }
+  }
+
+  nav.toc{
+    position:sticky; top:0; height:100vh; overflow-y:auto;
+    border-right:1px solid var(--line);
+    padding:28px 20px 40px;
+    background:linear-gradient(180deg,#131922,#10151c);
+  }
+  .toc-brand{
+    font-family:var(--mono); font-size:11px; letter-spacing:.14em;
+    color:var(--copper); margin-bottom:4px;
+  }
+  .toc-title{
+    font-family:var(--serif); font-size:19px; line-height:1.25; margin:0 0 22px;
+    color:var(--text);
+  }
+  .toc-list{ list-style:none; margin:0; padding:0; }
+  .toc-list li{ margin-bottom:2px; }
+  .toc-list a{
+    display:flex; gap:10px; align-items:baseline;
+    border-bottom:none; color:var(--text-dim);
+    font-size:13.5px; padding:6px 8px; border-radius:3px;
+    transition:background .15s, color .15s;
+  }
+  .toc-list a:hover{ background:var(--panel-2); color:var(--text); }
+  .toc-list a.active{ background:var(--panel-2); color:var(--copper); }
+  .toc-num{ font-family:var(--mono); font-size:11px; color:var(--text-faint); min-width:22px; }
+  .toc-sub{ margin:18px 0 8px; font-family:var(--mono); font-size:10.5px; letter-spacing:.12em; color:var(--text-faint); }
+
+  main{ min-width:0; }
+
+  .sheet{
+    max-width:900px;
+    margin:0 auto;
+    padding:64px 32px 20px;
+    border-bottom:1px solid var(--line-soft);
+    position:relative;
+  }
+  .sheet:last-of-type{ border-bottom:none; }
+
+  .sheet-tag{
+    font-family:var(--mono); font-size:11.5px; letter-spacing:.1em;
+    color:var(--text-faint); display:flex; justify-content:space-between;
+    margin-bottom:18px; border-bottom:1px dashed var(--line); padding-bottom:10px;
+  }
+  .sheet-tag b{ color:var(--copper); font-weight:500; }
+
+  .sheet h2{
+    font-family:var(--serif); font-weight:600; font-size:32px;
+    margin:0 0 6px; color:var(--text); letter-spacing:-.01em;
+  }
+  .sheet .dek{
+    color:var(--text-dim); font-size:16.5px; max-width:60ch; margin:0 0 28px;
+    font-family:var(--serif); font-style:italic;
+  }
+  .prose{ max-width:70ch; }
+  .prose p{ margin:0 0 16px; color:#d6dbe1; }
+  .prose strong{ color:var(--text); font-weight:600; }
+  .prose ul, .prose ol{ margin:0 0 16px; padding-left:22px; color:#d6dbe1; }
+  .prose li{ margin-bottom:8px; }
+  code, .kbd{
+    font-family:var(--mono); background:var(--panel-2); border:1px solid var(--line);
+    padding:1px 6px; border-radius:3px; font-size:.87em; color:var(--amber);
+  }
+
+  /* ---------- hero ---------- */
+  .hero{
+    max-width:900px; margin:0 auto; padding:80px 32px 40px;
+  }
+  .hero-eyebrow{ font-family:var(--mono); font-size:12px; color:var(--copper); letter-spacing:.14em; margin-bottom:18px; }
+  .hero h1{
+    font-family:var(--serif); font-size:56px; line-height:1.02; margin:0 0 20px;
+    letter-spacing:-.015em; color:#fff;
+  }
+  .hero h1 em{ color:var(--copper); font-style:normal; }
+  .hero p.lede{ font-size:19px; color:var(--text-dim); max-width:56ch; margin:0 0 36px; }
+  @media (max-width:600px){ .hero h1{font-size:38px;} .sheet h2{font-size:26px;} }
+
+  /* equation strip */
+  .equation{
+    display:flex; align-items:center; gap:18px; flex-wrap:wrap;
+    font-family:var(--mono); font-size:20px; padding:22px 26px;
+    background:var(--panel); border:1px solid var(--line); border-radius:6px;
+    margin-bottom:10px;
+  }
+  .eq-block{ padding:8px 16px; border:1px solid var(--line); border-radius:4px; background:var(--panel-2); }
+  .eq-block.m{ color:var(--teal); border-color:#3a6667; }
+  .eq-block.h{ color:var(--copper); border-color:#6b4a2e; }
+  .eq-block.a{ color:#fff; border-color:#4a4436; background:#241d15; }
+  .eq-sym{ color:var(--text-faint); }
+
+  /* ---------- diagram frame ---------- */
+  .fig{ margin:28px 0 34px; }
+  .fig-frame{
+    background:var(--panel); border:1px solid var(--line); border-radius:8px;
+    padding:18px; overflow-x:auto;
+  }
+  .fig svg{ display:block; width:100%; height:auto; }
+  .fig-cap{
+    font-family:var(--mono); font-size:12px; color:var(--text-faint);
+    margin-top:10px; padding-left:2px;
+  }
+  .fig-cap b{ color:var(--text-dim); }
+
+  /* ---------- callouts ---------- */
+  .callout{
+    border-left:3px solid var(--copper); background:var(--panel);
+    padding:16px 20px; border-radius:0 6px 6px 0; margin:22px 0;
+  }
+  .callout.warn{ border-color:var(--fault); }
+  .callout.tip{ border-color:var(--teal); }
+  .callout .label{ font-family:var(--mono); font-size:11px; letter-spacing:.1em; color:var(--copper); margin-bottom:8px; }
+  .callout.warn .label{ color:var(--fault); }
+  .callout.tip .label{ color:var(--teal); }
+  .callout p{ margin:0; color:#d6dbe1; font-size:15px; }
+
+  /* ---------- grid of cards ---------- */
+  .grid{ display:grid; gap:14px; margin:24px 0; }
+  .grid.g3{ grid-template-columns:repeat(3,1fr); }
+  .grid.g2{ grid-template-columns:repeat(2,1fr); }
+  @media (max-width:700px){ .grid.g3, .grid.g2{ grid-template-columns:1fr; } }
+  .card{
+    background:var(--panel); border:1px solid var(--line); border-radius:6px; padding:16px 18px;
+  }
+  .card .n{ font-family:var(--mono); font-size:11px; color:var(--copper); margin-bottom:6px; }
+  .card h4{ margin:0 0 6px; font-size:15px; font-family:var(--sans); font-weight:600; color:var(--text); }
+  .card p{ margin:0; font-size:13.5px; color:var(--text-dim); }
+
+  /* ---------- table ---------- */
+  .table-wrap{ overflow-x:auto; margin:24px 0; border:1px solid var(--line); border-radius:8px; }
+  table{ border-collapse:collapse; width:100%; min-width:640px; font-size:14px; }
+  th, td{ padding:11px 14px; text-align:left; border-bottom:1px solid var(--line); vertical-align:top; }
+  th{ font-family:var(--mono); font-size:11.5px; letter-spacing:.06em; color:var(--copper); background:var(--panel-2); font-weight:500; }
+  td{ color:#d6dbe1; }
+  tr:last-child td{ border-bottom:none; }
+  tbody tr:hover{ background:#1a222c; }
+
+  /* ---------- code block ---------- */
+  pre{
+    background:#0d1218; border:1px solid var(--line); border-radius:8px;
+    padding:18px 20px; overflow-x:auto; font-family:var(--mono); font-size:13px;
+    line-height:1.6; color:#c9d3dc; margin:22px 0;
+  }
+  pre .c1{ color:var(--text-faint); font-style:italic; }
+  pre .kw{ color:var(--teal); }
+  pre .st{ color:var(--amber); }
+  pre .fn{ color:var(--copper); }
+
+  /* ---------- glossary ---------- */
+  dl.gloss{ margin:0; }
+  dl.gloss dt{
+    font-family:var(--mono); color:var(--copper); font-size:14.5px; margin-top:18px;
+    border-top:1px solid var(--line-soft); padding-top:14px;
+  }
+  dl.gloss dt:first-child{ border-top:none; margin-top:0; padding-top:0; }
+  dl.gloss dd{ margin:6px 0 0; color:var(--text-dim); font-size:14.5px; }
+
+  /* ---------- quiz ---------- */
+  .quiz-item{ background:var(--panel); border:1px solid var(--line); border-radius:8px; padding:18px 20px; margin-bottom:14px; }
+  .quiz-q{ font-weight:600; color:var(--text); margin-bottom:12px; font-size:15px; }
+  .quiz-opts{ display:flex; flex-direction:column; gap:8px; }
+  .quiz-opt{
+    text-align:left; background:var(--panel-2); border:1px solid var(--line); color:#d6dbe1;
+    padding:10px 14px; border-radius:5px; font-family:var(--sans); font-size:14px; cursor:pointer;
+    transition:border-color .15s, background .15s;
+  }
+  .quiz-opt:hover{ border-color:var(--text-faint); }
+  .quiz-opt.correct{ border-color:var(--teal); background:#173636; color:#cdeeee; }
+  .quiz-opt.wrong{ border-color:var(--fault); background:#3a1f1c; color:#f0d3ce; }
+  .quiz-explain{ margin-top:10px; font-size:13.5px; color:var(--text-dim); display:none; padding-top:10px; border-top:1px dashed var(--line); }
+  .quiz-explain.show{ display:block; }
+  .quiz-score{
+    font-family:var(--mono); font-size:14px; color:var(--copper); text-align:center;
+    padding:16px; border:1px dashed var(--copper-dim); border-radius:6px; margin-top:6px;
+  }
+
+  /* ---------- reading list ---------- */
+  .read-item{ padding:12px 0; border-bottom:1px solid var(--line-soft); display:flex; gap:14px; }
+  .read-item:last-child{ border-bottom:none; }
+  .read-item .src{ font-family:var(--mono); font-size:11px; color:var(--text-faint); min-width:120px; }
+  .read-item .body a{ color:var(--text); font-weight:500; border:none; }
+  .read-item .body a:hover{ color:var(--teal); }
+  .read-item .body p{ margin:4px 0 0; font-size:13px; color:var(--text-dim); }
+
+  footer{
+    max-width:900px; margin:0 auto; padding:40px 32px 90px; color:var(--text-faint);
+    font-family:var(--mono); font-size:12px;
+  }
+
+  ::-webkit-scrollbar{ width:10px; height:10px; }
+  ::-webkit-scrollbar-track{ background:var(--bg); }
+  ::-webkit-scrollbar-thumb{ background:var(--panel-2); border-radius:5px; border:2px solid var(--bg); }
+</style>
+</head>
+<body>
+
+<div class="shell">
+  <nav class="toc" id="toc">
+    <div class="toc-brand">FIELD GUIDE / REV. 2026.09</div>
+    <div class="toc-title">Harness&nbsp;Engineering</div>
+    <ul class="toc-list">
+      <li><a href="#s01"><span class="toc-num">01</span> Definition</a></li>
+      <li><a href="#s02"><span class="toc-num">02</span> Why it matters</a></li>
+      <li><a href="#s03"><span class="toc-num">03</span> Anatomy of a harness</a></li>
+      <li><a href="#s04"><span class="toc-num">04</span> The agent loop</a></li>
+      <li><a href="#s05"><span class="toc-num">05</span> Tool harness vs. user harness</a></li>
+      <li><a href="#s06"><span class="toc-num">06</span> Worked example: Claude Code</a></li>
+      <li><a href="#s07"><span class="toc-num">07</span> Comparing harnesses</a></li>
+      <li><a href="#s08"><span class="toc-num">08</span> Build a mini harness</a></li>
+      <li><a href="#s09"><span class="toc-num">09</span> Key techniques</a></li>
+      <li><a href="#s10"><span class="toc-num">10</span> Anti-patterns</a></li>
+      <li><a href="#s11"><span class="toc-num">11</span> Related disciplines</a></li>
+      <li><a href="#s12"><span class="toc-num">12</span> Glossary</a></li>
+      <li><a href="#s13"><span class="toc-num">13</span> Self-check quiz</a></li>
+      <li><a href="#s14"><span class="toc-num">14</span> Further reading</a></li>
+    </ul>
+    <div class="toc-sub">STUDY PATH</div>
+    <ul class="toc-list">
+      <li style="color:var(--text-faint); font-size:12px; padding:6px 8px;">≈ 35–45 min read · 8 exercises</li>
+    </ul>
+  </nav>
+
+  <main>
+
+    <!-- ============ HERO ============ -->
+    <div class="hero">
+      <div class="hero-eyebrow">STUDY GUIDE · AI AGENT SYSTEMS</div>
+      <h1>Harness<br>Engin<em>eer</em>ing</h1>
+      <p class="lede">The discipline of building everything around a language model that the model cannot do on its own — so that it becomes a dependable agent, not just an impressive autocomplete.</p>
+      <div class="equation">
+        <div class="eq-block m">MODEL</div>
+        <span class="eq-sym">+</span>
+        <div class="eq-block h">HARNESS</div>
+        <span class="eq-sym">=</span>
+        <div class="eq-block a">AGENT</div>
+      </div>
+      <div class="fig-cap">The shorthand the field has converged on. The model supplies reasoning; the harness supplies everything that turns reasoning into reliable action.</div>
+    </div>
+
+    <!-- ============ 01 DEFINITION ============ -->
+    <section class="sheet" id="s01">
+      <div class="sheet-tag"><span>SHEET <b>01</b> / 14</span><span>FOUNDATIONS</span></div>
+      <h2>What is Harness Engineering?</h2>
+      <p class="dek">Turning a text predictor into a system that can act, remember, and be trusted.</p>
+
+      <div class="prose">
+        <p>A raw language model does one thing: it takes in text and returns text. It has no memory between calls, cannot run code, cannot touch a live file system or database, and has no built-in sense of whether its own output actually worked. Everything else an "AI agent" appears to do — editing a codebase, booking a flight, querying a warehouse, waiting for a test suite to pass before continuing — is not the model. It's the <strong>harness</strong>: the code, configuration, and execution logic wrapped around the model that supplies state, tools, context, and control.</p>
+
+        <p><strong>Harness engineering</strong> is the deliberate practice of designing that surrounding system, rather than letting it emerge by accident from whatever a framework's defaults happen to provide. It covers the tools an agent can call, how its context window is filled and refreshed, how it remembers things across sessions, how its actions are checked before and after execution, and where the boundaries of its authority are drawn.</p>
+
+        <p>The term itself is recent. It was popularized in a widely circulated piece by Mitchell Hashimoto (co-founder of HashiCorp and creator of Terraform) in early 2026, who framed it as the practice of designing the full environment an agent operates within — the rules it follows, the checks it must pass, and the feedback loops that keep it from repeating a mistake. Related terms had already been circulating — <em>context engineering</em>, <em>agent scaffolding</em>, <em>agent-computer interfaces</em> — and harness engineering is best understood as the umbrella term that absorbed them.</p>
+      </div>
+
+      <div class="callout tip">
+        <div class="label">CORE INSIGHT</div>
+        <p>Two teams running the identical model can get wildly different results. The gap is almost never the model — it's the harness. Model choice is one lever. Harness design is usually the bigger one.</p>
+      </div>
+    </section>
+
+    <!-- ============ 02 WHY IT MATTERS ============ -->
+    <section class="sheet" id="s02">
+      <div class="sheet-tag"><span>SHEET <b>02</b> / 14</span><span>MOTIVATION</span></div>
+      <h2>Why it matters</h2>
+      <p class="dek">The scaffolding moves the needle more than the model swap you were about to make.</p>
+
+      <div class="prose">
+        <p>Researchers at Stanford and Tsinghua University compared identical models running inside differently designed agent wrappers and found performance swings of up to <strong>6×</strong> on the same complex, multi-step tasks — from barely usable to near-human — with the model held completely constant. Only the scaffolding around it changed.</p>
+        <p>This matters practically because it inverts where most teams spend their effort. It's common to see a team benchmark GPT-4 against Claude against Gemini and treat the winner as the whole decision, while the harness around the model is assembled ad hoc: a prompt, a couple of tools wired up, done. Harness engineering treats that scaffolding as a first-class design problem, on the same footing as model selection.</p>
+      </div>
+
+      <div class="fig">
+        <div class="fig-frame">
+          <svg viewBox="0 0 760 220" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <linearGradient id="barA" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#5fbfc0"/><stop offset="100%" stop-color="#2f6f70"/>
+              </linearGradient>
+              <linearGradient id="barB" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#d98a47"/><stop offset="100%" stop-color="#7a4c26"/>
+              </linearGradient>
+            </defs>
+            <line x1="60" y1="180" x2="720" y2="180" stroke="#2a3441" stroke-width="1"/>
+            <!-- weak harness -->
+            <rect x="130" y="150" width="70" height="30" fill="url(#barA)" rx="3"/>
+            <text x="165" y="200" text-anchor="middle" fill="#98a3b0" font-family="IBM Plex Mono" font-size="11">MINIMAL</text>
+            <text x="165" y="213" text-anchor="middle" fill="#5f6b78" font-family="IBM Plex Mono" font-size="10">HARNESS</text>
+            <text x="165" y="140" text-anchor="middle" fill="#e7eaee" font-family="IBM Plex Mono" font-size="13">~16%</text>
+            <!-- strong harness -->
+            <rect x="330" y="40" width="70" height="140" fill="url(#barB)" rx="3"/>
+            <text x="365" y="200" text-anchor="middle" fill="#98a3b0" font-family="IBM Plex Mono" font-size="11">ENGINEERED</text>
+            <text x="365" y="213" text-anchor="middle" fill="#5f6b78" font-family="IBM Plex Mono" font-size="10">HARNESS</text>
+            <text x="365" y="30" text-anchor="middle" fill="#e7eaee" font-family="IBM Plex Mono" font-size="13">~96%</text>
+            <!-- same model label -->
+            <text x="530" y="90" fill="#d6dbe1" font-family="IBM Plex Sans" font-size="14">Same underlying model.</text>
+            <text x="530" y="112" fill="#d6dbe1" font-family="IBM Plex Sans" font-size="14">Only the scaffolding</text>
+            <text x="530" y="134" fill="#d6dbe1" font-family="IBM Plex Sans" font-size="14">around it changed.</text>
+            <path d="M420 100 L510 100" stroke="#5f6b78" stroke-dasharray="3,3" fill="none"/>
+          </svg>
+        </div>
+        <div class="fig-cap"><b>Fig. 1</b> — Illustrative rendering of the Stanford/Tsinghua finding: identical model, task-success rates that differ by up to 6× depending purely on harness design.</div>
+      </div>
+    </section>
+
+    <!-- ============ 03 ANATOMY ============ -->
+    <section class="sheet" id="s03">
+      <div class="sheet-tag"><span>SHEET <b>03</b> / 14</span><span>ARCHITECTURE</span></div>
+      <h2>Anatomy of a harness</h2>
+      <p class="dek">Nine components show up, in some form, in almost every production agent.</p>
+
+      <div class="fig">
+        <div class="fig-frame">
+          <svg viewBox="0 0 760 440" xmlns="http://www.w3.org/2000/svg">
+            <!-- center model core -->
+            <circle cx="380" cy="220" r="58" fill="#1c2530" stroke="#5fbfc0" stroke-width="2"/>
+            <text x="380" y="216" text-anchor="middle" fill="#5fbfc0" font-family="IBM Plex Mono" font-size="13">MODEL</text>
+            <text x="380" y="232" text-anchor="middle" fill="#5fbfc0" font-family="IBM Plex Mono" font-size="13">CORE</text>
+
+            <!-- 8 surrounding nodes positions -->
+            <!-- helper: draw line + box -->
+            <g font-family="IBM Plex Mono" font-size="10.5" fill="#d6dbe1">
+
+              <line x1="380" y1="162" x2="380" y2="70" stroke="#d98a47" stroke-width="1.4"/>
+              <rect x="300" y="30" width="160" height="40" rx="5" fill="#161d26" stroke="#2a3441"/>
+              <text x="380" y="54" text-anchor="middle">MODEL INTERFACE</text>
+
+              <line x1="428" y1="184" x2="560" y2="100" stroke="#d98a47" stroke-width="1.4"/>
+              <rect x="545" y="60" width="150" height="40" rx="5" fill="#161d26" stroke="#2a3441"/>
+              <text x="620" y="84" text-anchor="middle">TOOL REGISTRY</text>
+
+              <line x1="438" y1="220" x2="580" y2="220" stroke="#d98a47" stroke-width="1.4"/>
+              <rect x="580" y="200" width="150" height="40" rx="5" fill="#161d26" stroke="#2a3441"/>
+              <text x="655" y="224" text-anchor="middle">EXECUTION ENGINE</text>
+
+              <line x1="428" y1="256" x2="560" y2="340" stroke="#d98a47" stroke-width="1.4"/>
+              <rect x="545" y="340" width="150" height="40" rx="5" fill="#161d26" stroke="#2a3441"/>
+              <text x="620" y="364" text-anchor="middle">MEMORY SYSTEM</text>
+
+              <line x1="380" y1="278" x2="380" y2="380" stroke="#d98a47" stroke-width="1.4"/>
+              <rect x="300" y="380" width="160" height="40" rx="5" fill="#161d26" stroke="#2a3441"/>
+              <text x="380" y="404" text-anchor="middle">FEEDBACK LOOP</text>
+
+              <line x1="332" y1="256" x2="200" y2="340" stroke="#d98a47" stroke-width="1.4"/>
+              <rect x="65" y="340" width="150" height="40" rx="5" fill="#161d26" stroke="#2a3441"/>
+              <text x="140" y="364" text-anchor="middle">SAFETY GUARDRAILS</text>
+
+              <line x1="322" y1="220" x2="200" y2="220" stroke="#d98a47" stroke-width="1.4"/>
+              <rect x="30" y="200" width="150" height="40" rx="5" fill="#161d26" stroke="#2a3441"/>
+              <text x="105" y="224" text-anchor="middle">CONTEXT MANAGER</text>
+
+              <line x1="332" y1="184" x2="200" y2="100" stroke="#d98a47" stroke-width="1.4"/>
+              <rect x="45" y="60" width="150" height="40" rx="5" fill="#161d26" stroke="#2a3441"/>
+              <text x="120" y="84" text-anchor="middle">PLANNING MODULE</text>
+
+              <rect x="300" y="0" width="0" height="0"/>
+            </g>
+            <text x="380" y="440" text-anchor="middle" fill="#5f6b78" font-family="IBM Plex Mono" font-size="10.5">ORCHESTRATION LAYER — coordinates all eight components across every step</text>
+          </svg>
+        </div>
+        <div class="fig-cap"><b>Fig. 2</b> — The nine parts of a typical agent harness, wired around a fixed model core.</div>
+      </div>
+
+      <div class="grid g3">
+        <div class="card"><div class="n">01</div><h4>Model interface</h4><p>The API layer that sends prompts and receives completions — including retries, streaming, and structured-output parsing.</p></div>
+        <div class="card"><div class="n">02</div><h4>Tool registry</h4><p>The catalog of actions the agent may call: file edits, shell commands, web search, API requests, database queries.</p></div>
+        <div class="card"><div class="n">03</div><h4>Context manager</h4><p>Decides what goes into the limited context window — which files, which history, which summaries — and in what order.</p></div>
+        <div class="card"><div class="n">04</div><h4>Planning module</h4><p>Breaks a goal into steps, decides what to do next, and revises the plan as new information arrives.</p></div>
+        <div class="card"><div class="n">05</div><h4>Execution engine</h4><p>Actually runs tool calls — often inside a sandbox — and returns real-world results back to the model.</p></div>
+        <div class="card"><div class="n">06</div><h4>Memory system</h4><p>Persists facts, decisions, and progress across steps and sessions, beyond what fits in one context window.</p></div>
+        <div class="card"><div class="n">07</div><h4>Feedback loop</h4><p>Feeds execution results, test outcomes, and errors back to the model so it can correct course.</p></div>
+        <div class="card"><div class="n">08</div><h4>Safety guardrails</h4><p>Permission gates, approval prompts, and hard limits that keep the agent inside its intended authority.</p></div>
+        <div class="card"><div class="n">09</div><h4>Orchestration layer</h4><p>The control loop that ties all of the above together across every step of a multi-step task.</p></div>
+      </div>
+
+      <div class="prose">
+        <p><strong>In production, the orchestration layer and planning module are rarely hand-rolled as a bare <code>while</code> loop.</strong> Teams reach for tooling built specifically for durable, branching agent control flow:</p>
+      </div>
+
+      <div class="grid g2">
+        <div class="card">
+          <div class="n">GRAPH-BASED CONTROL</div>
+          <h4><a href="https://github.com/langchain-ai/langgraph" target="_blank" rel="noopener">LangGraph</a> / <a href="https://microsoft.github.io/autogen/" target="_blank" rel="noopener">AutoGen</a></h4>
+          <p>Model the planning module as an explicit directed graph of states and transitions instead of nested if/else logic — makes conditional branching, retries, and multi-agent handoffs inspectable and testable.</p>
+        </div>
+        <div class="card">
+          <div class="n">DURABLE EXECUTION</div>
+          <h4><a href="https://temporal.io/" target="_blank" rel="noopener">Temporal</a></h4>
+          <p>Runs the orchestration loop as a fault-tolerant workflow that survives process crashes and restarts mid-task — critical once an agent's tasks run for minutes or hours rather than seconds.</p>
+        </div>
+      </div>
+
+      <div class="callout tip">
+        <div class="label">FOR PROFESSIONALS</div>
+        <p>Whether to hand-roll the loop or adopt a framework is itself a harness-engineering decision. Hand-rolled loops are transparent and easy to debug at small scale; graph and durable-execution frameworks earn their overhead once you have long-horizon tasks, multiple cooperating agents, or a requirement to survive infrastructure failures mid-run.</p>
+      </div>
+    </section>
+
+    <!-- ============ 04 AGENT LOOP ============ -->
+    <section class="sheet" id="s04">
+      <div class="sheet-tag"><span>SHEET <b>04</b> / 14</span><span>RUNTIME BEHAVIOR</span></div>
+      <h2>The agent loop</h2>
+      <p class="dek">A harness turns one model call into a closed loop that runs until the task is verifiably done.</p>
+
+      <div class="fig">
+        <div class="fig-frame">
+          <svg viewBox="0 0 760 300" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <marker id="arrow" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+                <path d="M0,0 L6,3 L0,6 Z" fill="#d98a47"/>
+              </marker>
+            </defs>
+            <!-- 5 stage circle -->
+            <g font-family="IBM Plex Mono" font-size="12" fill="#e7eaee" text-anchor="middle">
+              <circle cx="120" cy="150" r="48" fill="#1c2530" stroke="#5fbfc0" stroke-width="1.6"/>
+              <text x="120" y="146">PERCEIVE</text><text x="120" y="162" fill="#98a3b0" font-size="9.5">read state</text>
+
+              <circle cx="290" cy="70" r="48" fill="#1c2530" stroke="#5fbfc0" stroke-width="1.6"/>
+              <text x="290" y="66">PLAN</text><text x="290" y="82" fill="#98a3b0" font-size="9.5">choose next step</text>
+
+              <circle cx="460" cy="70" r="48" fill="#1c2530" stroke="#5fbfc0" stroke-width="1.6"/>
+              <text x="460" y="66">ACT</text><text x="460" y="82" fill="#98a3b0" font-size="9.5">call a tool</text>
+
+              <circle cx="630" cy="150" r="48" fill="#1c2530" stroke="#5fbfc0" stroke-width="1.6"/>
+              <text x="630" y="146">OBSERVE</text><text x="630" y="162" fill="#98a3b0" font-size="9.5">read the result</text>
+
+              <circle cx="375" cy="240" r="48" fill="#241d15" stroke="#d98a47" stroke-width="1.8"/>
+              <text x="375" y="236" fill="#d98a47">VERIFY</text><text x="375" y="252" fill="#98a3b0" font-size="9.5">tests, checks, review</text>
+            </g>
+            <path d="M162 130 Q 220 90 250 78" stroke="#d98a47" fill="none" marker-end="url(#arrow)"/>
+            <path d="M338 68 Q 380 60 412 68" stroke="#d98a47" fill="none" marker-end="url(#arrow)"/>
+            <path d="M500 90 Q 560 110 592 132" stroke="#d98a47" fill="none" marker-end="url(#arrow)"/>
+            <path d="M600 190 Q 500 225 424 232" stroke="#d98a47" fill="none" marker-end="url(#arrow)"/>
+            <path d="M340 216 Q 220 190 160 178" stroke="#d98a47" fill="none" marker-end="url(#arrow)"/>
+            <text x="380" y="292" text-anchor="middle" fill="#5f6b78" font-size="10.5" font-family="IBM Plex Mono">loops until VERIFY passes or a stopping condition is hit</text>
+          </svg>
+        </div>
+        <div class="fig-cap"><b>Fig. 3</b> — The perceive → plan → act → observe → verify cycle a harness drives on every turn.</div>
+      </div>
+
+      <div class="prose">
+        <p>Take a coding agent asked to fix a failing test. Left alone, a model can only describe a plausible fix in prose. Inside a harness, the loop looks like this: it <strong>perceives</strong> the current file and test output, <strong>plans</strong> a change, <strong>acts</strong> by editing the file through a tool call, <strong>observes</strong> the diff and re-run test output, then <strong>verifies</strong> against a concrete signal — the test suite passing — rather than the model's own claim that it's done. If verification fails, the loop repeats with the new information folded in. This is the difference between an agent that reports success and one that has actually confirmed it.</p>
+      </div>
+
+      <div class="callout warn">
+        <div class="label">COMMON FAILURE MODE</div>
+        <p>Without an explicit verify stage, a harness has no way to distinguish "the model says it's done" from "it's actually done." Binding completion to a deterministic check — a test, a lint pass, a schema validation — is one of the highest-leverage things a harness can add.</p>
+      </div>
+    </section>
+
+    <!-- ============ 05 TOOL vs USER HARNESS ============ -->
+    <section class="sheet" id="s05">
+      <div class="sheet-tag"><span>SHEET <b>05</b> / 14</span><span>DECOMPOSITION</span></div>
+      <h2>Tool harness vs. user harness</h2>
+      <p class="dek">Part of the harness ships with the product. Part of it is yours to build.</p>
+
+      <div class="prose">
+        <p>A more precise version of the shorthand splits the harness in two: <code>Agent = Model + Tool Harness + User Harness</code>. The <strong>tool harness</strong> is what a product like Claude Code or Cursor already provides — its built-in tool set, sandboxing, and orchestration loop. The <strong>user harness</strong> is the project-specific layer that a team builds on top: house rules, test requirements, context documents, and conventions that tell a generic coding agent how <em>this</em> codebase specifically wants to be worked on.</p>
+      </div>
+
+      <div class="grid g2">
+        <div class="card">
+          <div class="n">TOOL HARNESS</div>
+          <h4>Comes with the product</h4>
+          <p>Model interface, sandboxed execution, the built-in tool catalog (read/edit/search/run), and the core orchestration loop that drives multi-step tool use.</p>
+        </div>
+        <div class="card">
+          <div class="n">USER HARNESS</div>
+          <h4>Built by the team</h4>
+          <p>Repo-local instructions (e.g. <code>CLAUDE.md</code>), required checks before a change is "done," context documents, custom subagents, and permission policies.</p>
+        </div>
+      </div>
+
+      <div class="prose">
+        <p>This split matters because it clarifies where your leverage actually is. You usually can't change a product's tool harness, but you have almost complete control over the user harness — and in practice, that's where most of the reliability gains in day-to-day use come from.</p>
+      </div>
+    </section>
+
+    <!-- ============ 06 WORKED EXAMPLE ============ -->
+    <section class="sheet" id="s06">
+      <div class="sheet-tag"><span>SHEET <b>06</b> / 14</span><span>CASE STUDY</span></div>
+      <h2>Worked example: a coding-agent harness</h2>
+      <p class="dek">Mapping the nine components onto a real tool-using coding agent.</p>
+
+      <div class="prose">
+        <p>Tools like Claude Code, Cursor, and similar coding agents are not "a chat interface bolted onto a model" — they are a model wrapped in a harness purpose-built for software work. Walking the nine components against this concrete case makes the abstraction click:</p>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Component</th><th>What it looks like in a coding agent</th></tr></thead>
+          <tbody>
+            <tr><td>Model interface</td><td>Streams responses from the underlying model, parses tool-call requests out of them.</td></tr>
+            <tr><td>Tool registry</td><td>A curated set: read file, edit file, run a shell command, search the repo, fetch a URL.</td></tr>
+            <tr><td>Context manager</td><td>Decides which files and how much conversation history fit in the window; compacts or summarizes the rest.</td></tr>
+            <tr><td>Planning module</td><td>Breaks "fix the bug" into: reproduce it, locate the cause, change code, re-test.</td></tr>
+            <tr><td>Execution engine</td><td>Runs shell commands and file edits, often inside a sandbox with restricted network and disk access.</td></tr>
+            <tr><td>Memory system</td><td>A repo-local instructions file plus session logs that can be reloaded in later sessions.</td></tr>
+            <tr><td>Feedback loop</td><td>Test output, linter errors, and stack traces are fed back into context after each action.</td></tr>
+            <tr><td>Safety guardrails</td><td>Approval prompts before destructive commands; restrictions on which directories can be touched.</td></tr>
+            <tr><td>Orchestration layer</td><td>The loop that keeps calling the model with updated context until the task is verified complete.</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="callout tip">
+        <div class="label">STUDY TIP</div>
+        <p>Next time you use any AI coding tool, try to name which of the nine components you're interacting with at each moment — a prompt for permission is a guardrail; a summarized chat history is the context manager at work. It's the fastest way to internalize the model.</p>
+      </div>
+    </section>
+
+    <!-- ============ 07 COMPARISON ============ -->
+    <section class="sheet" id="s07">
+      <div class="sheet-tag"><span>SHEET <b>07</b> / 14</span><span>SURVEY</span></div>
+      <h2>Comparing harnesses</h2>
+      <p class="dek">Different products make different trade-offs on the same nine components.</p>
+
+      <div class="prose"><p>Coding-agent harnesses increasingly differentiate less on the model they call and more on how they manage memory and autonomy. A useful lens is to look at how each handles three memory layers: immediate context in the active window, session-level state as a task progresses, and durable memory that survives across sessions.</p></div>
+
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Layer</th><th>Ephemeral (in-window)</th><th>Session-level</th><th>Durable (cross-session)</th></tr></thead>
+          <tbody>
+            <tr><td>What it holds</td><td>Recent messages, open file, cursor position, latest tool output</td><td>Task plan, edits made so far, files touched this run</td><td>Project conventions, past architecture decisions, known gotchas</td></tr>
+            <tr><td>Typical mechanism</td><td>The raw context window itself</td><td>Working notes, TODO state, in-memory task graph</td><td>Repo-local instruction files, external memory stores, session summaries reloaded at startup</td></tr>
+            <tr><td>Risk if under-designed</td><td>Losing track of what was just tried</td><td>Re-doing work already completed this run</td><td>Repeating the same mistake in every new session</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="prose">
+        <p>The specific products in this space move quickly and their internals aren't all public, so treat any product-by-product comparison as a snapshot rather than a spec. The stable takeaway is the framework, not the vendor detail: ask of any harness you evaluate, "what happens to information at each of these three layers once it's no longer in the active context window?"</p>
+      </div>
+    </section>
+
+    <!-- ============ 08 BUILD A MINI HARNESS ============ -->
+    <section class="sheet" id="s08">
+      <div class="sheet-tag"><span>SHEET <b>08</b> / 14</span><span>HANDS-ON</span></div>
+      <h2>Build a mini harness</h2>
+      <p class="dek">A minimal but complete loop, in pseudocode, showing every component doing real work.</p>
+
+      <div class="prose"><p>Below is a more complete reference loop for "fix this failing test." Beyond the base tool registry, guardrail, and verification gate, it wires in the two pieces that separate a toy loop from something you'd actually run: <strong>context compaction</strong>, so the window doesn't overflow on longer tasks, and a <strong>durable memory</strong> read/write, so a lesson learned in one run is available in the next.</p></div>
+
+      <pre><span class="c1"># A more complete harness for "fix the failing test"</span>
+<span class="kw">import</span> os, json
+
+<span class="kw">class</span> <span class="fn">ProductionHarness</span>:
+    <span class="kw">def</span> <span class="fn">__init__</span>(self, model_client, guardrail, max_steps=<span class="st">8</span>, compaction_threshold=<span class="st">4</span>):
+        self.model = model_client
+        self.guardrail = guardrail
+        self.max_steps = max_steps
+        self.compaction_threshold = compaction_threshold
+        self.memory_file = <span class="st">".agent_durable_memory.json"</span>
+        self.tools = {                                  <span class="c1"># component: tool registry</span>
+            <span class="st">"read_file"</span>:  self._read_file,
+            <span class="st">"edit_file"</span>:  self._edit_file,
+            <span class="st">"run_tests"</span>:  self._run_tests,
+        }
+
+    <span class="kw">def</span> <span class="fn">run</span>(self, goal):
+        <span class="c1"># CONTEXT MANAGER — seed the window with the goal + any durable memory</span>
+        history = [
+            {<span class="st">"role"</span>: <span class="st">"system"</span>, <span class="st">"content"</span>: <span class="st">"You are a pragmatic software agent."</span>},
+            {<span class="st">"role"</span>: <span class="st">"user"</span>,   <span class="st">"content"</span>: <span class="kw">f</span><span class="st">"Goal: {goal}\nPast notes: {self._load_durable_memory()}"</span>},
+        ]
+
+        <span class="kw">for</span> step <span class="kw">in</span> range(self.max_steps):
+            <span class="c1"># CONTEXT COMPACTION — summarize the middle, keep the goal and latest turn</span>
+            <span class="kw">if</span> len(history) > self.compaction_threshold:
+                history = self._compact(history)
+
+            <span class="c1"># PLAN + ACT</span>
+            action = self.model.get_next_action(history)
+
+            <span class="c1"># SAFETY GUARDRAILS — enforced outside the model's own judgment</span>
+            <span class="kw">if</span> <span class="kw">not</span> self.guardrail.is_allowed(action):
+                history.append({<span class="st">"role"</span>: <span class="st">"user"</span>, <span class="st">"content"</span>: <span class="kw">f</span><span class="st">"Blocked: {action.tool} denied by policy."</span>})
+                <span class="kw">continue</span>
+
+            <span class="c1"># EXECUTION ENGINE + FEEDBACK LOOP</span>
+            <span class="kw">try</span>:
+                result = self.tools[action.tool](*action.args)
+                history.append({<span class="st">"role"</span>: <span class="st">"user"</span>, <span class="st">"content"</span>: <span class="kw">f</span><span class="st">"Observation: {result['output']}"</span>})
+            <span class="kw">except</span> Exception <span class="kw">as</span> e:
+                history.append({<span class="st">"role"</span>: <span class="st">"user"</span>, <span class="st">"content"</span>: <span class="kw">f</span><span class="st">"Execution error: {e}"</span>})
+                <span class="kw">continue</span>
+
+            <span class="c1"># VERIFICATION GATE — bound to a deterministic check, not a claim</span>
+            <span class="kw">if</span> action.tool == <span class="st">"run_tests"</span> <span class="kw">and</span> result.get(<span class="st">"passed"</span>):
+                self._write_durable_memory(goal, action.args)   <span class="c1"># durable memory write</span>
+                <span class="kw">return</span> {<span class="st">"status"</span>: <span class="st">"SUCCESS"</span>, <span class="st">"steps"</span>: step + <span class="st">1</span>, <span class="st">"log"</span>: history}
+
+        <span class="kw">return</span> {<span class="st">"status"</span>: <span class="st">"FAILURE"</span>, <span class="st">"reason"</span>: <span class="st">"max_steps exceeded"</span>}
+
+    <span class="kw">def</span> <span class="fn">_compact</span>(self, history):
+        <span class="c1">"""Keep the system+goal turns and the latest turn; summarize the middle."""</span>
+        head, latest = history[:<span class="st">2</span>], history[-<span class="st">1</span>:]
+        summary = {<span class="st">"role"</span>: <span class="st">"user"</span>, <span class="st">"content"</span>: <span class="kw">f</span><span class="st">"[Compressed {len(history)-3} earlier turns.]"</span>}
+        <span class="kw">return</span> head + [summary] + latest
+
+    <span class="kw">def</span> <span class="fn">_load_durable_memory</span>(self):
+        <span class="kw">if</span> os.path.exists(self.memory_file):
+            <span class="kw">return</span> json.dumps(json.load(open(self.memory_file)))
+        <span class="kw">return</span> <span class="st">"No prior notes."</span>
+
+    <span class="kw">def</span> <span class="fn">_write_durable_memory</span>(self, goal, args):
+        json.dump({<span class="st">"last_fix"</span>: goal, <span class="st">"affected"</span>: args}, open(self.memory_file, <span class="st">"w"</span>))
+</pre>
+
+      <div class="callout tip">
+        <div class="label">WHAT CHANGED FROM THE FIRST PASS</div>
+        <p>Two additions turn this from a demo into something closer to production-shaped: <code>_compact</code> stops the context window from growing without bound on longer tasks, and <code>_load_durable_memory</code> / <code>_write_durable_memory</code> carry a lesson learned across separate runs — closing the "durable memory" gap called out in Sheet 03's memory-hierarchy discussion.</p>
+      </div>
+
+      <div class="grid g2">
+        <div class="card"><div class="n">TRY IT</div><h4>Exercise</h4><p>The current <code>_compact</code> keeps only the last turn. Rework it to keep the last <em>failed</em> attempt visible even after compaction, per the context-engineering technique in Sheet 09.</p></div>
+        <div class="card"><div class="n">TRY IT</div><h4>Exercise</h4><p>Swap the hand-rolled <code>for</code> loop for a LangGraph state graph with explicit <code>plan → act → verify</code> nodes, and compare how failure handling changes.</p></div>
+      </div>
+    </section>
+
+    <!-- ============ 09 KEY TECHNIQUES ============ -->
+    <section class="sheet" id="s09">
+      <div class="sheet-tag"><span>SHEET <b>09</b> / 14</span><span>TECHNIQUES</span></div>
+      <h2>Key techniques</h2>
+      <p class="dek">The specific practices practitioners reach for once the basic loop is in place.</p>
+
+      <div class="prose">
+        <ul>
+          <li><strong>Context engineering.</strong> Deliberately shaping what fills the context window: keeping cache-friendly prompt prefixes stable, masking out irrelevant tools rather than removing them, using the file system itself as external memory, and — counterintuitively — keeping some failed attempts visible in context so the model doesn't repeat them.</li>
+          <li><strong>Verification loops.</strong> Distinguishing checkpoint evals (a single check at the end) from continuous evals (checks after every step), and choosing graders — deterministic tests, LLM-graded rubrics, human review — appropriate to the risk of the task.</li>
+          <li><strong>Permission and guardrail design.</strong> Defining what an agent may do without approval, what needs a human in the loop, and what's off-limits entirely — ideally enforced by a policy layer outside the model's own judgment, not just a system-prompt instruction.</li>
+          <li><strong>Memory persistence.</strong> Hooks or explicit steps that save state at the end of a session and reload it at the start of the next one, so an agent doesn't relearn the same project facts every time.</li>
+          <li><strong>Loop engineering.</strong> A layer above harness engineering: instead of a human prompting turn by turn, a system triggers the agent repeatedly, spawns helper agents for sub-tasks, and verifies results on its own.</li>
+        </ul>
+      </div>
+
+      <div class="fig">
+        <div class="fig-frame">
+          <svg viewBox="0 0 760 150" xmlns="http://www.w3.org/2000/svg">
+            <defs><marker id="arrow2" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#5f6b78"/></marker></defs>
+            <line x1="40" y1="100" x2="720" y2="100" stroke="#2a3441" stroke-width="1.4" marker-end="url(#arrow2)"/>
+            <g font-family="IBM Plex Mono" font-size="11.5" text-anchor="middle">
+              <circle cx="100" cy="100" r="6" fill="#5fbfc0"/><text x="100" y="130" fill="#98a3b0">PROMPT</text><text x="100" y="144" fill="#5f6b78" font-size="9.5">ENGINEERING</text>
+              <circle cx="290" cy="100" r="6" fill="#5fbfc0"/><text x="290" y="130" fill="#98a3b0">CONTEXT</text><text x="290" y="144" fill="#5f6b78" font-size="9.5">ENGINEERING</text>
+              <circle cx="480" cy="100" r="6" fill="#d98a47"/><text x="480" y="130" fill="#e0b15a">HARNESS</text><text x="480" y="144" fill="#5f6b78" font-size="9.5">ENGINEERING</text>
+              <circle cx="670" cy="100" r="6" fill="#e0b15a"/><text x="670" y="130" fill="#e0b15a">LOOP</text><text x="670" y="144" fill="#5f6b78" font-size="9.5">ENGINEERING</text>
+            </g>
+            <text x="100" y="80" text-anchor="middle" fill="#5f6b78" font-family="IBM Plex Mono" font-size="10">word choice</text>
+            <text x="290" y="80" text-anchor="middle" fill="#5f6b78" font-family="IBM Plex Mono" font-size="10">window contents</text>
+            <text x="480" y="80" text-anchor="middle" fill="#5f6b78" font-family="IBM Plex Mono" font-size="10">whole system</text>
+            <text x="670" y="80" text-anchor="middle" fill="#5f6b78" font-family="IBM Plex Mono" font-size="10">who triggers it</text>
+          </svg>
+        </div>
+        <div class="fig-cap"><b>Fig. 4</b> — Widening scope, left to right. Each layer builds on the one before it rather than replacing it.</div>
+      </div>
+    </section>
+
+    <!-- ============ 10 ANTI-PATTERNS ============ -->
+    <section class="sheet" id="s10">
+      <div class="sheet-tag"><span>SHEET <b>10</b> / 14</span><span>FAILURE MODES</span></div>
+      <h2>Anti-patterns</h2>
+      <p class="dek">The mistakes that show up most often once teams start relying on agents in production.</p>
+
+      <div class="grid g2">
+        <div class="card"><div class="n">✕</div><h4>The implicit harness</h4><p>Picking a model, writing a prompt, wiring up a couple of tools, and calling it done — with no one having decided the memory, verification, or permission strategy on purpose.</p></div>
+        <div class="card"><div class="n">✕</div><h4>Trusting self-reported completion</h4><p>Treating "I've fixed it" from the model as equivalent to a passing test. Without a deterministic check, "done" is just another guess.</p></div>
+        <div class="card"><div class="n">✕</div><h4>Unbounded context growth</h4><p>Letting history accumulate indefinitely until the window overflows or quality degrades, instead of deliberately compacting or retrieving only what's relevant.</p></div>
+        <div class="card"><div class="n">✕</div><h4>No permission boundary</h4><p>Giving an agent broad tool access with only a prompt-level instruction ("please don't delete production data") standing between it and a destructive action.</p></div>
+        <div class="card"><div class="n">✕</div><h4>Treating the harness as one-and-done</h4><p>Shipping a harness once and never revisiting it, even as the tasks, model, and failure patterns it needs to handle keep changing.</p></div>
+        <div class="card"><div class="n">✕</div><h4>Losing useful failures</h4><p>Scrubbing failed attempts out of context to "keep things clean," which removes exactly the signal that would stop the agent from retrying the same dead end.</p></div>
+      </div>
+    </section>
+
+    <!-- ============ 11 RELATED DISCIPLINES ============ -->
+    <section class="sheet" id="s11">
+      <div class="sheet-tag"><span>SHEET <b>11</b> / 14</span><span>VOCABULARY</span></div>
+      <h2>Related disciplines</h2>
+      <p class="dek">Four terms that get used interchangeably but describe different scopes of the same problem.</p>
+
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Term</th><th>Scope</th><th>Typical question it answers</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Prompt engineering</strong></td><td>The words in a single request to the model</td><td>"How do I phrase this so the model responds well?"</td></tr>
+            <tr><td><strong>Context engineering</strong></td><td>What fills the context window over a session</td><td>"What information should be in the window right now, and in what form?"</td></tr>
+            <tr><td><strong>Harness engineering</strong></td><td>The whole system around the model: tools, memory, verification, permissions</td><td>"What does the model need around it to act reliably, not just respond well?"</td></tr>
+            <tr><td><strong>Loop engineering</strong></td><td>What triggers the harness to run, repeatedly, without a human prompting each turn</td><td>"What decides when the agent runs again, and who checks the result?"</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="prose"><p>None of these replace the others. Prompt engineering still matters inside a well-built harness; context engineering is one of a harness's core components (Sheet 03); loop engineering assumes a working harness already exists underneath it.</p></div>
+    </section>
+
+    <!-- ============ 12 GLOSSARY ============ -->
+    <section class="sheet" id="s12">
+      <div class="sheet-tag"><span>SHEET <b>12</b> / 14</span><span>REFERENCE</span></div>
+      <h2>Glossary</h2>
+      <p class="dek">Terms worth being able to define cold.</p>
+
+      <dl class="gloss">
+        <dt>Agent</dt><dd>A model paired with a harness that lets it take actions and pursue a goal across multiple steps, not just answer a single prompt.</dd>
+        <dt>Harness</dt><dd>Everything surrounding a model in an agent system except the model itself — tools, context management, memory, verification, and guardrails.</dd>
+        <dt>Context window</dt><dd>The finite amount of text a model can attend to in a single call; a central resource the context manager allocates.</dd>
+        <dt>Tool registry</dt><dd>The defined set of actions (functions, APIs, commands) a harness exposes for the model to call.</dd>
+        <dt>MCP (Model Context Protocol)</dt><dd>An open protocol for connecting models to external tools and data sources in a standardized way, rather than each harness inventing its own integration format.</dd>
+        <dt>Sandboxing</dt><dd>Running an agent's actions in an isolated environment with restricted access, so mistakes or unintended actions can't reach production systems.</dd>
+        <dt>Guardrail</dt><dd>A rule enforced by the harness — not the model's own judgment — that blocks or requires approval for certain actions.</dd>
+        <dt>Verification gate</dt><dd>A deterministic check (test, lint, schema validation) that a task must pass before the harness considers it complete.</dd>
+        <dt>Subagent</dt><dd>A separate agent instance spawned by an orchestrating agent to handle a bounded sub-task, often with its own isolated context.</dd>
+        <dt>Loop engineering</dt><dd>Designing the system that repeatedly invokes an agent's harness without a human prompting each turn.</dd>
+      </dl>
+    </section>
+
+    <!-- ============ 13 QUIZ ============ -->
+    <section class="sheet" id="s13">
+      <div class="sheet-tag"><span>SHEET <b>13</b> / 14</span><span>SELF-CHECK</span></div>
+      <h2>Self-check quiz</h2>
+      <p class="dek">Eight questions. Click an answer to check it — you can retry.</p>
+
+      <div id="quiz"></div>
+      <div class="quiz-score" id="quizScore">Score: 0 / 8</div>
+    </section>
+
+    <!-- ============ 14 FURTHER READING ============ -->
+    <section class="sheet" id="s14">
+      <div class="sheet-tag"><span>SHEET <b>14</b> / 14</span><span>SOURCES</span></div>
+      <h2>Further reading</h2>
+      <p class="dek">Where the ideas in this guide come from, for going deeper.</p>
+
+      <div class="read-item">
+        <div class="src">MARTIN FOWLER</div>
+        <div class="body"><a href="https://martinfowler.com/articles/harness-engineering.html" target="_blank" rel="noopener">Harness engineering for coding agent users</a><p>A grounded take on narrowing the broad "Agent = Model + Harness" definition down to coding agents specifically.</p></div>
+      </div>
+      <div class="read-item">
+        <div class="src">SIG</div>
+        <div class="body"><a href="https://www.softwareimprovementgroup.com/blog/what-is-harness-engineering/" target="_blank" rel="noopener">What is harness engineering?</a><p>Traces the term's origin to Mitchell Hashimoto and connects it to software portfolio governance.</p></div>
+      </div>
+      <div class="read-item">
+        <div class="src">PORT</div>
+        <div class="body"><a href="https://www.port.io/blog/what-is-harness-engineering" target="_blank" rel="noopener">What Is Harness Engineering? Definition, Types, and Examples in AI SDLC</a><p>Covers harness types, components, common mistakes, and the underlying economics.</p></div>
+      </div>
+      <div class="read-item">
+        <div class="src">MINDSTUDIO</div>
+        <div class="body"><a href="https://www.mindstudio.ai/blog/what-is-agent-harness-architecture-explained" target="_blank" rel="noopener">What Is an Agent Harness? The Architecture Behind Claude Code, Codex, and Cursor</a><p>The source for the nine-component breakdown used in Sheet 03.</p></div>
+      </div>
+      <div class="read-item">
+        <div class="src">MINDSTUDIO</div>
+        <div class="body"><a href="https://www.mindstudio.ai/blog/what-is-harness-engineering" target="_blank" rel="noopener">Why Your Agent Wrapper Drives More Performance Than the Model</a><p>Covers the Stanford/Tsinghua 6× performance-gap research referenced in Sheet 02.</p></div>
+      </div>
+      <div class="read-item">
+        <div class="src">CODECENTRIC</div>
+        <div class="body"><a href="https://www.codecentric.de/en/knowledge-hub/blog/loop-harness-context-engineering-explained" target="_blank" rel="noopener">Loop, Harness, Context Engineering: The Terms Explained</a><p>Source for the tool-harness / user-harness split and the introduction to loop engineering.</p></div>
+      </div>
+      <div class="read-item">
+        <div class="src">GITHUB</div>
+        <div class="body"><a href="https://github.com/ai-boost/awesome-harness-engineering" target="_blank" rel="noopener">awesome-harness-engineering</a><p>A curated, actively updated list of harness patterns, tools, and papers.</p></div>
+      </div>
+      <div class="read-item">
+        <div class="src">ARXIV</div>
+        <div class="body"><a href="https://arxiv.org/pdf/2604.25850" target="_blank" rel="noopener">Agentic Harness Engineering: Observability-Driven Automatic Evolution of Coding-Agent Harnesses</a><p>An academic treatment of harnesses as an evaluable, evolvable object of study.</p></div>
+      </div>
+    </section>
+
+    <footer>
+      HARNESS ENGINEERING — FIELD GUIDE · GENERATED FOR STUDY PURPOSES · CHECK PRIMARY SOURCES ABOVE FOR THE LATEST DEVELOPMENTS
+    </footer>
+
+  </main>
+</div>
+
+<script>
+  // scroll-spy for TOC
+  const sections = document.querySelectorAll('.sheet[id]');
+  const links = document.querySelectorAll('.toc-list a');
+  const byId = {};
+  links.forEach(l => byId[l.getAttribute('href').slice(1)] = l);
+  const obs = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      const link = byId[e.target.id];
+      if (!link) return;
+      if (e.isIntersecting) {
+        links.forEach(l => l.classList.remove('active'));
+        link.classList.add('active');
+      }
+    });
+  }, { rootMargin: '-10% 0px -70% 0px', threshold: 0 });
+  sections.forEach(s => obs.observe(s));
+
+  // quiz
+  const QUIZ = [
+    {
+      q: "In the shorthand \"Agent = Model + Harness,\" what does the harness supply?",
+      opts: ["Better word choice in prompts", "Everything the model can't do alone: tools, state, memory, control", "A larger context window", "A fine-tuned version of the model"],
+      correct: 1,
+      explain: "The harness is the code and infrastructure wrapped around the model — tools, memory, execution, and verification — not a change to the model itself."
+    },
+    {
+      q: "According to the Stanford/Tsinghua research cited in this guide, what caused up to a 6× performance gap on the same tasks?",
+      opts: ["Switching to a larger model", "Using a different programming language", "Changing only the agent wrapper (harness) around an identical model", "Increasing the temperature setting"],
+      correct: 2,
+      explain: "The model was held constant; only the scaffolding around it — the harness — changed, yet outcomes ranged widely."
+    },
+    {
+      q: "Which component decides what actually goes into the model's context window on a given step?",
+      opts: ["Safety guardrails", "Tool registry", "Context manager", "Execution engine"],
+      correct: 2,
+      explain: "The context manager selects and orders what fills the limited context window — files, history, summaries."
+    },
+    {
+      q: "Why does trusting a model's own claim of \"task complete\" count as an anti-pattern?",
+      opts: ["It uses too many tokens", "It's not bound to a deterministic check, so it's just another guess", "It slows down the loop", "Models are not allowed to make claims"],
+      correct: 1,
+      explain: "Without a verification gate — a test, a lint pass, a schema check — 'done' is a natural-language assertion, not evidence."
+    },
+    {
+      q: "In the tool-harness / user-harness split, which one is typically built by the team using the product, not the vendor?",
+      opts: ["Tool harness", "User harness", "Both, equally", "Neither — vendors control all of it"],
+      correct: 1,
+      explain: "The user harness is the project-specific layer: house rules, required checks, context docs, and conventions layered on top of a product's built-in tool harness."
+    },
+    {
+      q: "What does 'loop engineering' add on top of harness engineering?",
+      opts: ["A bigger tool registry", "A system that triggers the agent repeatedly and verifies results without a human prompting each turn", "A faster model", "A different context window size"],
+      correct: 1,
+      explain: "Loop engineering is about who or what triggers the harness to run again — automating the repetition a human used to do turn by turn."
+    },
+    {
+      q: "Which of these is listed as a genuine harness anti-pattern?",
+      opts: ["Adding a verification gate before marking a task complete", "Scrubbing all failed attempts out of context to 'keep things clean'", "Defining a clear permission boundary for destructive actions", "Compacting context deliberately as it grows"],
+      correct: 1,
+      explain: "Removing failed attempts removes the signal that stops an agent from repeating the same dead end — the other three are good practices, not anti-patterns."
+    },
+    {
+      q: "Which term describes shaping what fills the context window over a session, specifically?",
+      opts: ["Prompt engineering", "Context engineering", "Loop engineering", "Model interface design"],
+      correct: 1,
+      explain: "Context engineering is scoped to window contents across a session; prompt engineering is scoped to the wording of a single request."
+    }
+  ];
+
+  const quizEl = document.getElementById('quiz');
+  let score = 0;
+  const answered = new Set();
+
+  QUIZ.forEach((item, i) => {
+    const wrap = document.createElement('div');
+    wrap.className = 'quiz-item';
+    const qEl = document.createElement('div');
+    qEl.className = 'quiz-q';
+    qEl.textContent = (i+1) + '. ' + item.q;
+    wrap.appendChild(qEl);
+
+    const optsEl = document.createElement('div');
+    optsEl.className = 'quiz-opts';
+
+    const explainEl = document.createElement('div');
+    explainEl.className = 'quiz-explain';
+    explainEl.textContent = item.explain;
+
+    item.opts.forEach((opt, oi) => {
+      const btn = document.createElement('button');
+      btn.className = 'quiz-opt';
+      btn.textContent = opt;
+      btn.addEventListener('click', () => {
+        const already = answered.has(i);
+        [...optsEl.children].forEach((b, bi) => {
+          b.classList.remove('correct', 'wrong');
+          if (bi === item.correct) b.classList.add('correct');
+        });
+        if (oi !== item.correct) btn.classList.add('wrong');
+        explainEl.classList.add('show');
+        if (!already) {
+          answered.add(i);
+          if (oi === item.correct) score++;
+          document.getElementById('quizScore').textContent = 'Score: ' + score + ' / ' + QUIZ.length;
+        }
+      });
+      optsEl.appendChild(btn);
+    });
+
+    wrap.appendChild(optsEl);
+    wrap.appendChild(explainEl);
+    quizEl.appendChild(wrap);
+  });
+</script>
+
+</body>
+</html>
